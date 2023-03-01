@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GeoIP Lookup</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function lookup() {
+            var ip = $('#ip-address').val();
+            $.getJSON('/geoip?ip=' + ip, function(data) {
+                $('#asn').text(data.asn);
+                $('#org').text(data.org);
+                $('#city').text(data.city);
+                $('#region').text(data.region);
+                $('#country').text(data.country);
+                $('#latitude').text(data.latitude);
+                $('#longitude').text(data.longitude);
+            }).fail(function() {
+                $('#asn').text('An error occurred');
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>GeoIP Lookup</h1>
+    <form>
+        <label for="ip-address">IP address:</label>
+        <input type="text" id="ip-address" name="ip-address" value="8.8.8.8">
+        <input type="button" value="Lookup" onclick="lookup()">
+    </form>
+    <h2>Results</h2>
+    <p>ASN: <span id="asn"></span></p>
+    <p>Organization: <span id="org"></span></p>
+    <p>City: <span id="city"></span></p>
+    <p>Region: <span id="region"></span></p>
+    <p>Country: <span id="country"></span></p>
+    <p>Latitude: <span id="latitude"></span></p>
+    <p>Longitude: <span id="longitude"></span></p>
+</body>
+</html>
+

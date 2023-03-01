@@ -1,37 +1,25 @@
-from flask import Flask, request, jsonify
-import geoip2.database
-import os
+from flask import Flask, jsonify, render_template, request
+from geoip2 import database
 
 app = Flask(__name__)
 
-# Path to the MaxMind GeoIP2 database file
-DATABASE_PATH = os.path.join(os.path.dirname(__file__), 'GeoLite2-ASN.mmdb')
+# Replace the path with the actual path to the GeoLite2-ASN.mmdb file
+DATABASE_PATH = 'GeoLite2-ASN.mmdb'
 
-# Function to retrieve the geo-location information for an IP address
-def get_geoip_info(ip_address):
-    with geoip2.database.Reader(DATABASE_PATH) as reader:
-        try:
-            response = reader.asn(ip_address)
-            return {
-                'ip_address': ip_address,
-                'asn': response.autonomous_system_number,
-                'isp': response.autonomous_system_organization
-            }
-        except geoip2.errors.AddressNotFoundError:
-            return None
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
 
-# Route to handle the IP address lookup
 @app.route('/geoip', methods=['GET'])
 def geoip():
-    ip_address = request.args.get('ip_address')
+    ip_address = request.args.get('ip')
     if ip_address:
-        geoip_info = get_geoip_info(ip_address)
-        if geoip_info:
-            return jsonify(geoip_info)
-        else:
-            return jsonify({'error': 'IP address not found'}), 404
+        with database.Reader(DATABASE_PATH) as reader:
+            response = reader.asn(ip_address)
+            return jsonify({'asn': response.autonomous_system_number, 'org': response.autonomous_system_organization})
     else:
-        return jsonify({'error': 'IP address required'}), 400
+        return 'Please provide an IP address.'
 
 if __name__ == '__main__':
-    app.run(port=8083)
+    app.run()
+
