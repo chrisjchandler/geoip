@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GeoIP Lookup</title>
+  </head>
+  <body>
+    <h1>GeoIP Lookup</h1>
+    <form action="/geoip" method="post">
+      <label for="ip_address">IP address:</label>
+      <input type="text" name="ip_address" id="ip_address">
+      <button type="submit">Lookup</button>
+    </form>
+    <div id="results"></div>
+    <script>
+      // Function to handle the form submission
+      function handleSubmit(event) {
+        event.preventDefault();
+        const ip_address = document.getElementById('ip_address').value;
+        fetch('/geoip', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: new URLSearchParams({
+            'ip_address': ip_address
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          const results = document.getElementById('results');
+          if (data.error) {
+            results.textContent = data.error;
+          } else {
+            results.innerHTML = `
+              <p>IP address: ${data.ip_address}</p>
+              <p>Latitude: ${data.latitude}</p>
+              <p>Longitude: ${data.longitude}</p>
+              <p>City: ${data.city}</p>
+              <p>Country: ${data.country}</p>
+          <p>ASN: ${data.asn}</p>
+        `;
+      }
+    })
+    .catch(error => {
+      const results = document.getElementById('results');
+      results.textContent = 'An error occurred: ' + error;
+    });
+  }
+
+  // Add event listener to the form
+  const form = document.querySelector('form');
+  form.addEventListener('submit', handleSubmit);
+</script> </body>
+</html>
+```
